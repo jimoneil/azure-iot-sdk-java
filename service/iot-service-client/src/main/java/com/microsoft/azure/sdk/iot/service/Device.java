@@ -136,6 +136,8 @@ public class Device extends BaseDevice
      */
     protected String statusReason;
 
+    private String scope;
+
     /**
      * Getter for status reason
      *
@@ -183,6 +185,16 @@ public class Device extends BaseDevice
         this.capabilities = capabilities;
     }
 
+    public String getScope()
+    {
+        return this.scope;
+    }
+
+    public void setScope(String scope)
+    {
+        this.scope = scope;
+    }
+
     /**
      * Converts this into a DeviceParser object. To serialize a Device object, it must first be converted to a DeviceParser object.
      * @return the DeviceParser object that can be serialized.
@@ -201,7 +213,9 @@ public class Device extends BaseDevice
             deviceParser.getCapabilities().setIotEdge(this.capabilities.isIotEdge());
         }
 
-        return  deviceParser;
+        deviceParser.setScope(this.scope);
+
+        return deviceParser;
     }
 
     /**
@@ -233,6 +247,8 @@ public class Device extends BaseDevice
         {
             this.status = DeviceStatus.fromString(parser.getStatus());
         }
+
+        this.scope = parser.getScope();
     }
 
     /*
@@ -243,5 +259,6 @@ public class Device extends BaseDevice
         this.status = DeviceStatus.Enabled;
         this.statusReason = "";
         this.statusUpdatedTime = UTC_TIME_DEFAULT;
+        this.scope = "";
     }
 }
