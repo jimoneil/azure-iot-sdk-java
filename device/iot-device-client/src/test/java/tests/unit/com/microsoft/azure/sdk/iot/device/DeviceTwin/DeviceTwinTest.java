@@ -1363,4 +1363,26 @@ public class DeviceTwinTest
 
         // assert
     }
+
+    @Test
+    public void tearDownTwinSuccess(@Mocked final IotHubTransportMessage mockedMessage)
+    {
+        // arrange
+        DeviceTwin testTwin = new DeviceTwin(mockedDeviceIO, mockedConfig,
+                mockedStatusCB, null, mockedGenericTwinPropertyCB, null);
+
+        new StrictExpectations()
+        {
+            {
+                new IotHubTransportMessage((byte[]) any, MessageType.DEVICE_TWIN);
+                result = mockedMessage;
+                mockedMessage.setRequestId(anyString);
+                mockedMessage.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_TEAR_DOWN);
+                mockedDeviceIO.sendEventAsync(mockedMessage, (IotHubEventCallback) any, null, anyString);
+            }
+        };
+
+        //act
+        testTwin.tearDownTwin();
+    }
 }

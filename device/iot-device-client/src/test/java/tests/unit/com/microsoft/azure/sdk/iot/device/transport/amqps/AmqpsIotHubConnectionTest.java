@@ -2234,6 +2234,10 @@ public class AmqpsIotHubConnectionTest {
                 result = mockedSymbol;
                 mockedSymbol.toString();
                 result = AmqpLinkRedirectException.errorCode;
+                mockEvent.getLink();
+                result = mockLink;
+                mockLink.getName();
+                result = "someTelemetryLink";
             }
         };
 

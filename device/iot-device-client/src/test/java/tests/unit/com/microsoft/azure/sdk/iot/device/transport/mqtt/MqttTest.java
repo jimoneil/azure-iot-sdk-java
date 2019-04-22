@@ -870,6 +870,67 @@ public class MqttTest
         };
     }
 
+    @Test
+    public void unsubscribeSucceeds() throws MqttException, TransportException
+    {
+        //arrange
+        baseConstructorExpectations();
+        baseConnectExpectation();
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = true;
+                mockMqttAsyncClient.unsubscribe(MOCK_PARSE_TOPIC);
+                result = mockMqttToken;
+            }
+        };
+        Mqtt mockMqtt = instantiateMqtt(true);
+        Deencapsulation.invoke(mockMqtt, "connect");
+
+        //act
+        Deencapsulation.invoke(mockMqtt, "unsubscribe", MOCK_PARSE_TOPIC);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                minTimes = 1;
+                mockMqttAsyncClient.unsubscribe(MOCK_PARSE_TOPIC);
+                times = 1;
+            }
+        };
+    }
+
+    @Test(expected = TransportException.class)
+    public void unsubscribeFailsWhenNotConnected() throws TransportException
+    {
+        //arrange
+        baseConstructorExpectations();
+        new NonStrictExpectations()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                result = false;
+            }
+        };
+
+        Mqtt mockMqtt = instantiateMqtt(true);
+
+        //act
+        Deencapsulation.invoke(mockMqtt, "unsubscribe", MOCK_PARSE_TOPIC);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMqttAsyncClient.isConnected();
+                minTimes = 1;
+            }
+        };
+    }
+
     // Tests_SRS_Mqtt_34_023: [This method shall call peekMessage to get the message payload from the received Messages queue corresponding to the messaging client's operation.]
     // Tests_SRS_Mqtt_34_024: [This method shall construct new Message with the bytes obtained from peekMessage and return the message.]
    @Test

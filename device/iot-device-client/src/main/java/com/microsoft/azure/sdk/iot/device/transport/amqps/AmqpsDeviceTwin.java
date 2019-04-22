@@ -33,8 +33,8 @@ public final class AmqpsDeviceTwin extends AmqpsDeviceOperations
     private static final String SENDER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/twin";
     private static final String RECEIVER_LINK_ENDPOINT_PATH_MODULES = "/devices/%s/modules/%s/twin";
 
-    private static final String SENDER_LINK_TAG_PREFIX = "sender_link_devicetwin-";
-    private static final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_devicetwin-";
+    protected static final String SENDER_LINK_TAG_PREFIX = "sender_link_devicetwin-";
+    protected static final String RECEIVER_LINK_TAG_PREFIX = "receiver_link_devicetwin-";
 
     private static final String MESSAGE_ANNOTATION_FIELD_KEY_OPERATION = "operation";
     private static final String MESSAGE_ANNOTATION_FIELD_KEY_RESOURCE = "resource";
