@@ -143,7 +143,7 @@ jobs:
     condition: always()  
     
  ### Android, Multi configuration build (12 different test groups to cover) ###
- - job: Android_Build
+ - job: AndroidBuild
   timeoutInMinutes: 180
   pool:
     name: Hosted VS2017
@@ -198,7 +198,7 @@ jobs:
     artifactName: 'androidBuildFiles'
     targetPath: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
     
-- job: Android_Test
+- job: AndroidTest
   timeoutInMinutes: 180
   pool:
     name: Hosted VS2017
@@ -232,7 +232,7 @@ jobs:
         
       
   displayName: Android Test
-  dependsOn: Android_Build
+  dependsOn: AndroidBuild
   steps:
   - powershell: ./vsts/install_appcenter_cli.ps1
     displayName: 'Install app center cli'
