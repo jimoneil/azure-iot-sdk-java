@@ -97,11 +97,11 @@ jobs:
   - powershell: ./vsts/install_appcenter_cli.ps1
     displayName: 'Install app center cli'
     condition: always()
-    
+   
   - task: DownloadPipelineArtifact@0
-  inputs:
-    artifactName: 'androidBuildFiles'
-    targetPath: iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug
+    inputs:
+      artifactName: 'androidBuildFiles'
+      targetPath: iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug
   
   - task: AppCenterTest@1
     displayName: 'E2E with Visual Studio App Center'
