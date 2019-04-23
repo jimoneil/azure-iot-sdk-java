@@ -55,8 +55,8 @@ jobs:
     
   - task: PublishPipelineArtifact@0
     inputs:
-    artifactName: 'androidBuildFiles'
-    targetPath: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      artifactName: 'androidBuildFiles'
+      targetPath: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
     
 - job: AndroidTest
   timeoutInMinutes: 180
