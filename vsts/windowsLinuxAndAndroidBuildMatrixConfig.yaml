@@ -46,7 +46,7 @@ jobs:
   - task: CopyFiles@2
     displayName: 'Copy Test Results to Artifact Staging Directory'
     inputs:
-      SourceFolder: '$(Build.SourcesDirectory)\iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      SourceFolder: '$(Build.SourcesDirectory)\iot-e2e-tests\android\app\build\outputs\apk'
       Contents: |
        *.*
       TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -56,7 +56,7 @@ jobs:
   - task: PublishPipelineArtifact@0
     inputs:
       artifactName: 'androidBuildFiles'
-      targetPath: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      targetPath: 'iot-e2e-tests\android\app\build\outputs\apk'
     
 - job: AndroidTest
   timeoutInMinutes: 180
@@ -101,7 +101,7 @@ jobs:
   - task: DownloadPipelineArtifact@0
     inputs:
       artifactName: 'androidBuildFiles'
-      targetPath: iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug
+      targetPath: $(Build.ArtifactStagingDirectory)\iot-e2e-tests\android\app\build\outputs\apk
   
   - task: AppCenterTest@1
     displayName: 'E2E with Visual Studio App Center'
