@@ -106,9 +106,9 @@ jobs:
   - task: AppCenterTest@1
     displayName: 'E2E with Visual Studio App Center'
     inputs:
-      appFile: 'iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
+      appFile: '$(Build.ArtifactStagingDirectory)\iot-e2e-tests\android\app\build\outputs\apk\debug\app-debug.apk'
       frameworkOption: espresso
-      espressoBuildDirectory: 'iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
+      espressoBuildDirectory: '$(Build.ArtifactStagingDirectory)\iot-e2e-tests\android\app\build\outputs\apk\androidTest\debug'
       serverEndpoint: 'AppCenter connection aziotclb'
       appSlug: 'Azure-Iot-Sdk/androide2e'
       devices: 'Azure-Iot-Sdk/api28_2'
