@@ -51,46 +51,7 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         super(protocol, attestationType);
     }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void individualEnrollmentProvisioningFlowWithEdgeDevice() throws Exception
-    {
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(true);
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, null, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, getHostName(iotHubConnectionString), getHostName(farAwayIotHubConnectionString));
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void enrollmentGroupProvisioningFlowWithEdgeDevice() throws Exception
-    {
-        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(true);
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP, AllocationPolicy.HASHED, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, expectedHubsToProvisionTo);
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.GROUP);
-    }
-
+    
     @Test
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
@@ -227,6 +188,7 @@ public class ProvisioningTests extends ProvisioningCommon
         String expectedReportedPropertyValue = "someValue";
         sendReportedPropertyUpdate(expectedReportedPropertyName, expectedReportedPropertyValue, testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId);
 
+        deviceCapabilities.setIotEdge(false);
         updateEnrollmentToForceReprovisioning(enrollmentType, iothubsToFinishAt, reprovisionPolicy, deviceCapabilities);
 
         if (testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
