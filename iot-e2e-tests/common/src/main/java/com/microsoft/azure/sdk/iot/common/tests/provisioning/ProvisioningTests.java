@@ -53,32 +53,6 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void individualEnrollmentProvisioningFlow() throws Exception
-    {
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, getHostName(iotHubConnectionString), getHostName(farAwayIotHubConnectionString));
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    public void enrollmentGroupProvisioningFlow() throws Exception
-    {
-        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP);
-
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-        expectedHubsToProvisionTo.add(getHostName(farAwayIotHubConnectionString));
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, expectedHubsToProvisionTo);
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.GROUP);
-    }
-
-    @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
     public void individualEnrollmentProvisioningFlowWithEdgeDevice() throws Exception
     {
@@ -118,45 +92,6 @@ public class ProvisioningTests extends ProvisioningCommon
     }
 
     @Test
-    public void individualEnrollmentProvisioningFlowWithNonEdgeDevice() throws Exception
-    {
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(false);
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL, null, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, null, getHostName(iotHubConnectionString), getHostName(farAwayIotHubConnectionString));
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        // delete enrollment
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.INDIVIDUAL);
-    }
-
-    @Test
-    public void enrollmentGroupProvisioningFlowWithNonEdgeDevice() throws Exception
-    {
-        if (testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
-        {
-            //tpm doesn't support group, and x509 group test has not been implemented yet
-            return;
-        }
-
-        ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>();
-        expectedHubsToProvisionTo.add(getHostName(iotHubConnectionString));
-
-        DeviceCapabilities expectedDeviceCapabilities = new DeviceCapabilities();
-        expectedDeviceCapabilities.setIotEdge(false);
-        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP, AllocationPolicy.HASHED, null, null, expectedHubsToProvisionTo, expectedDeviceCapabilities);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, expectedHubsToProvisionTo);
-
-        assertProvisionedDeviceCapabilitiesAreExpected(expectedDeviceCapabilities);
-
-        // delete enrollment
-        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, EnrollmentType.GROUP);
-    }
-
-    @Test
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
@@ -170,24 +105,13 @@ public class ProvisioningTests extends ProvisioningCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void groupEnrollmentProvisioningReprovisioningKeepTwin() throws Exception
+    public void groupEnrollmentProvisioningReprovisioningTwinCanBeMigratedOrReset() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setMigrateDeviceData(true);
         reprovisionPolicy.setUpdateHubAssignment(true);
 
-        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void groupEnrollmentProvisioningReprovisioningResetTwin() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setMigrateDeviceData(false);
-        reprovisionPolicy.setUpdateHubAssignment(true);
-
-        reprovisioningFlow(EnrollmentType.GROUP, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
+        reprovisioningTwinFlow(EnrollmentType.GROUP, null, null, getStartingHubs(), getHubsToReprovisionTo());
     }
 
     @Test
@@ -207,24 +131,13 @@ public class ProvisioningTests extends ProvisioningCommon
 
     @Test
     @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void individualEnrollmentProvisioningReprovisioningKeepTwin() throws Exception
+    public void individualEnrollmentProvisioningReprovisioningCanBeMigratedOrReset() throws Exception
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setMigrateDeviceData(true);
         reprovisionPolicy.setUpdateHubAssignment(true);
 
-        reprovisioningFlow(EnrollmentType.INDIVIDUAL, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
-    }
-
-    @Test
-    @ConditionalIgnoreRule.ConditionalIgnore(condition = StandardTierOnlyRule.class)
-    public void individualEnrollmentProvisioningReprovisioningResetTwin() throws Exception
-    {
-        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
-        reprovisionPolicy.setMigrateDeviceData(false);
-        reprovisionPolicy.setUpdateHubAssignment(true);
-
-        reprovisioningFlow(EnrollmentType.INDIVIDUAL, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
+        reprovisioningTwinFlow(EnrollmentType.INDIVIDUAL, null, null, getStartingHubs(), getHubsToReprovisionTo());
     }
 
     @Test
@@ -232,7 +145,6 @@ public class ProvisioningTests extends ProvisioningCommon
     {
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
         reprovisionPolicy.setUpdateHubAssignment(false);
-
         reprovisioningFlow(EnrollmentType.INDIVIDUAL, null, reprovisionPolicy, null, getStartingHubs(), getHubsToReprovisionTo());
     }
 
@@ -287,21 +199,51 @@ public class ProvisioningTests extends ProvisioningCommon
 
     protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt) throws Exception
     {
+        reprovisioningFlow(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, iothubsToFinishAt, null);
+    }
+
+    protected void reprovisioningTwinFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt) throws Exception
+    {
         if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
         {
             //tpm doesn't support group, and x509 group test has not been implemented yet
             return;
         }
 
-        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt);
+        ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();
+        reprovisionPolicy.setMigrateDeviceData(true);
+        reprovisionPolicy.setUpdateHubAssignment(true);
+
+        DeviceCapabilities deviceCapabilities = new DeviceCapabilities();
+        deviceCapabilities.setIotEdge(true);
+
+        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt, deviceCapabilities);
 
         ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
+
+        assertProvisionedDeviceCapabilitiesAreExpected(deviceCapabilities);
 
         String expectedReportedPropertyName = "someProperty";
         String expectedReportedPropertyValue = "someValue";
         sendReportedPropertyUpdate(expectedReportedPropertyName, expectedReportedPropertyValue, testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId);
 
-        updateEnrollmentToForceReprovisioning(enrollmentType, iothubsToFinishAt);
+        updateEnrollmentToForceReprovisioning(enrollmentType, iothubsToFinishAt, reprovisionPolicy, deviceCapabilities);
+
+        if (testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
+        {
+            ((SecurityProviderTPMEmulator) testInstance.securityProvider).shutDown();
+            testInstance.securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId);
+        }
+
+        //re-register device, test which hub it was provisioned to
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, reprovisionPolicy.getUpdateHubAssignment() ? iothubsToFinishAt : iothubsToStartAt);
+        assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
+
+        assertProvisionedDeviceCapabilitiesAreExpected(deviceCapabilities);
+
+        //update enrollment to delete twin for next reprovision
+        reprovisionPolicy.setMigrateDeviceData(false);
+        updateEnrollmentToForceReprovisioning(enrollmentType, iothubsToStartAt, reprovisionPolicy, deviceCapabilities);
 
         if (testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
@@ -316,26 +258,40 @@ public class ProvisioningTests extends ProvisioningCommon
         cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, enrollmentType);
     }
 
-    private class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
+    protected void reprovisioningFlow(EnrollmentType enrollmentType, AllocationPolicy allocationPolicy, ReprovisionPolicy reprovisionPolicy, CustomAllocationDefinition customAllocationDefinition, List<String> iothubsToStartAt, List<String> iothubsToFinishAt, DeviceCapabilities deviceCapabilities) throws Exception
     {
-        private CountDownLatch twinLock;
-
-        public StubTwinCallback(CountDownLatch twinLock)
+        if (enrollmentType == EnrollmentType.GROUP && testInstance.attestationType != AttestationType.SYMMETRIC_KEY)
         {
-                this.twinLock = twinLock;
+            //tpm doesn't support group, and x509 group test has not been implemented yet
+            return;
         }
 
-        @Override
-        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType, allocationPolicy, reprovisionPolicy, customAllocationDefinition, iothubsToStartAt);
+
+        ProvisioningStatus provisioningStatus = registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, iothubsToStartAt);
+
+        if (deviceCapabilities != null)
         {
-            twinLock.countDown(); //this will be called once upon twin start, and once for sending a single reported property
+            assertProvisionedDeviceCapabilitiesAreExpected(deviceCapabilities);
         }
 
-        @Override
-        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        String expectedReportedPropertyName = "someProperty";
+        String expectedReportedPropertyValue = "someValue";
+        sendReportedPropertyUpdate(expectedReportedPropertyName, expectedReportedPropertyValue, testInstance.provisionedIotHubUri, testInstance.provisionedDeviceId);
+
+        updateEnrollmentToForceReprovisioning(enrollmentType, iothubsToFinishAt, reprovisionPolicy, deviceCapabilities);
+
+        if (testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
-            //do nothing
+            ((SecurityProviderTPMEmulator) testInstance.securityProvider).shutDown();
+            testInstance.securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId);
         }
+
+        //re-register device, test which hub it was provisioned to
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, true, reprovisionPolicy.getUpdateHubAssignment() ? iothubsToFinishAt : iothubsToStartAt);
+        assertTwinIsCorrect(reprovisionPolicy, expectedReportedPropertyName, expectedReportedPropertyValue, !reprovisionPolicy.getUpdateHubAssignment());
+
+        cleanUpReprovisionedDeviceAndEnrollment(testInstance.provisionedDeviceId, enrollmentType);
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
@@ -388,8 +344,6 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
 
-
-
     private void assertTwinIsCorrect(ReprovisionPolicy reprovisionPolicy, String expectedPropertyName, String expectedPropertyValue, boolean inFarAwayHub) throws IOException, IotHubException {
         if (reprovisionPolicy != null && reprovisionPolicy.getMigrateDeviceData() == true)
         {
@@ -410,21 +364,18 @@ public class ProvisioningTests extends ProvisioningCommon
             if (reprovisionPolicy.getMigrateDeviceData())
             {
                 //twin change from before reprovisioning was migrated
-                assertEquals(buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                        1, device.getReportedProperties().size());
+                assertEquals(buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), 1, device.getReportedProperties().size());
                 boolean expectedKeyPairFound = false;
-                for (Pair pair: device.getReportedProperties())
+                for (Pair pair : device.getReportedProperties())
                 {
                     expectedKeyPairFound |= (pair.getKey().equals(expectedPropertyName) && pair.getValue().equals(expectedPropertyValue));
                 }
-                assertTrue(buildExceptionMessageDpsIndividualOrGroup("Reported property that was sent was not found", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                        expectedKeyPairFound);
+                assertTrue(buildExceptionMessageDpsIndividualOrGroup("Reported property that was sent was not found", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), expectedKeyPairFound);
             }
             else
             {
                 //twin change from before reprovisioning was reset
-                assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId),
-                        0, device.getReportedProperties().size());
+                assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Twin size is unexpected value", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), 0, device.getReportedProperties().size());
             }
         }
     }
@@ -496,17 +447,43 @@ public class ProvisioningTests extends ProvisioningCommon
         deviceClient.close();
     }
 
-    private void updateEnrollmentToForceReprovisioning(EnrollmentType enrollmentType, List<String> iothubsToFinishAt) throws ProvisioningServiceClientException
+    private void updateEnrollmentToForceReprovisioning(EnrollmentType enrollmentType, List<String> iothubsToFinishAt, ReprovisionPolicy reprovisionPolicy, DeviceCapabilities deviceCapabilities) throws ProvisioningServiceClientException
     {
         if (enrollmentType == EnrollmentType.GROUP)
         {
             testInstance.enrollmentGroup.setIotHubs(iothubsToFinishAt);
+            testInstance.enrollmentGroup.setReprovisionPolicy(reprovisionPolicy);
+            testInstance.enrollmentGroup.setCapabilities(deviceCapabilities);
             provisioningServiceClient.createOrUpdateEnrollmentGroup(testInstance.enrollmentGroup);
         }
         else
         {
             testInstance.individualEnrollment.setIotHubs(iothubsToFinishAt);
+            testInstance.individualEnrollment.setReprovisionPolicy(reprovisionPolicy);
+            testInstance.individualEnrollment.setCapabilitiesFinal(deviceCapabilities);
             provisioningServiceClient.createOrUpdateIndividualEnrollment(testInstance.individualEnrollment);
+        }
+    }
+
+    private class StubTwinCallback implements IotHubEventCallback, PropertyCallBack
+    {
+        private CountDownLatch twinLock;
+
+        public StubTwinCallback(CountDownLatch twinLock)
+        {
+            this.twinLock = twinLock;
+        }
+
+        @Override
+        public void execute(IotHubStatusCode responseStatus, Object callbackContext)
+        {
+            twinLock.countDown(); //this will be called once upon twin start, and once for sending a single reported property
+        }
+
+        @Override
+        public void PropertyCall(Object propertyKey, Object propertyValue, Object context)
+        {
+            //do nothing
         }
     }
 }
